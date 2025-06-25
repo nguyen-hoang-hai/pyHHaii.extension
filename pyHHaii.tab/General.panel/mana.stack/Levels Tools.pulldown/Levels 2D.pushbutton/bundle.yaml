@@ -1,0 +1,7 @@
+title: Levels 2D
+tooltip: >-    
+    Only work for XY grids and plan views
+context: 
+    any:    
+        - active-elevation-view
+        - active-section-view

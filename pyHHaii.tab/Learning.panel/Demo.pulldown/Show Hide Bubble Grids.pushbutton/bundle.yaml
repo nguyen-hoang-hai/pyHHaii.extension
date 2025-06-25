@@ -1,0 +1,16 @@
+titile: Show Hide Bubble Grids
+
+tooltip: >-    
+    
+    Select at lest one direction.     
+    
+    Only work for XY grids and plan views
+
+
+
+context: active-plan-view
+
+
+help_url: "https://www.youtube.com/@paper.engineer"
+
+author: Paper Engineer

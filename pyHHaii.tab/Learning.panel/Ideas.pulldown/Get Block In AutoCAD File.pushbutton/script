@@ -1,0 +1,82 @@
+# -*- coding: utf-8 -*-
+
+# .NET Imports
+import clr
+clr.AddReference("System")
+from System.Collections.Generic import List
+
+# Revit Imports
+from Autodesk.Revit.DB import *
+from Autodesk.Revit.UI import *
+
+# Variables
+uidoc = __revit__.ActiveUIDocument
+doc = __revit__.ActiveUIDocument.Document
+
+# Coding
+# Output lists
+blocks = []
+points = []
+rotations = []
+layers_all = []
+
+# Geometry options
+options = Options()
+options.IncludeNonVisibleObjects = True
+options.ComputeReferences = True
+
+# Collect all ImportInstance (CAD links/imports)
+import_instances = FilteredElementCollector(doc).OfClass(ImportInstance)
+
+for import_elem in import_instances:
+    geo_elem = import_elem.get_Geometry(options)
+
+    for geo_obj in geo_elem:
+        # Transform of the import instance
+        transform = geo_obj.Transform
+        symbol_geometry = geo_obj.SymbolGeometry
+
+        for inst in symbol_geometry:
+            if isinstance(inst, GeometryInstance):
+                # --- Origin
+                origin = inst.Transform.Origin
+                points.append(origin)
+
+                # --- Rotation
+                try:
+                    angle_rad = inst.Transform.BasisX.AngleOnPlaneTo(XYZ.BasisX, XYZ.BasisZ)
+                    rotation = abs(math.degrees(angle_rad))
+                    if round(rotation, 3) == 360.0:
+                        rotation = 0
+                    rotations.append(round(rotation, 3))
+                except:
+                    rotations.append(0)
+
+                # --- Block name
+                try:
+                    block_name = inst.Symbol.Name
+                    blocks.append(block_name)
+                except:
+                    blocks.append("Unnamed")
+
+                # --- Try to get layer
+                layers = []
+                try:
+                    symbol_geo = inst.SymbolGeometry
+                    for g in symbol_geo:
+                        try:
+                            gstyle = doc.GetElement(g.GraphicsStyleId)
+                            layer_name = gstyle.GraphicsStyleCategory.Name
+                            if layer_name not in layers:
+                                layers.append(layer_name)
+                        except:
+                            pass
+                    if not layers:
+                        layers.append("Unknown")
+                except:
+                    layers.append("Error")
+                layers_all.append(layers)
+
+# Print results
+print("BLOCKS FOUND:", len(blocks))
+
