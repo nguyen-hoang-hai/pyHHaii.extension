@@ -23,8 +23,8 @@ try:
     """
     pickobjects = []
     for ref in ref_pickobjects:
-    elem = doc.GetElement(ref)
-    pickobjects.append(elem)
+        elem = doc.GetElement(ref)
+        pickobjects.append(elem)
     """
     for ob in pickobjects:
         print(ob.Name)

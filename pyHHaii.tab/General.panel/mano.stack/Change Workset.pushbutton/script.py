@@ -17,7 +17,13 @@ doc = __revit__.ActiveUIDocument.Document
 def select_element_of_category(doc, categories):
     if not isinstance(categories, list):
         categories = [categories]
-    category_filter = [ElementCategoryFilter(cat) for cat in categories]
+    # category_filter = [ElementCategoryFilter(cat) for cat in categories]
+
+    category_filter = []
+    for cat in categories:
+        elem = ElementCategoryFilter(cat).ToElement()
+        category_filter.append(elem)
+
     category_multi_filter = LogicalOrFilter(category_filter)
     return FilteredElementCollector(doc).WherePasses(category_multi_filter).WhereElementIsNotElementType().ToElements()
 

@@ -1,3 +1,5 @@
 layout:
   - memo
   - Template
+background:
+  title: '#FFEFD5'
