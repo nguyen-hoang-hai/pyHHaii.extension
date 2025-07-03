@@ -16,6 +16,7 @@ doc = uidoc.Document # Type: Document
 selection = uidoc.Selection # Type: Selection
 
 # Coding
+'''
 try:
     ref_pickobjects = selection.PickObjects(ObjectType.Element)
     pickobjects = [doc.GetElement(ref) for ref in ref_pickobjects]
@@ -32,3 +33,6 @@ except OperationCanceledException:
     print("Ban Da Bam Cancel")
 except Exception:
     print("Bi Loi Rui Nhe")
+'''
+from HH_selection import select_elements
+print(select_elements(doc))
