@@ -17,12 +17,7 @@ doc = __revit__.ActiveUIDocument.Document
 def select_element_of_category(doc, categories):
     if not isinstance(categories, list):
         categories = [categories]
-    # category_filter = [ElementCategoryFilter(cat) for cat in categories]
-
-    category_filter = []
-    for cat in categories:
-        elem = ElementCategoryFilter(cat).ToElement()
-        category_filter.append(elem)
+    category_filter = [ElementCategoryFilter(cat) for cat in categories]
 
     category_multi_filter = LogicalOrFilter(category_filter)
     return FilteredElementCollector(doc).WherePasses(category_multi_filter).WhereElementIsNotElementType().ToElements()
@@ -90,7 +85,6 @@ for elem in lighting_vs_exit_emergency:
         exit_emergency.append(elem)
     else:
         lighting.append(elem)
-
 
 change_workset(user_ws, ws_lighting, lighting)
 change_workset(user_ws, ws_exit_emergency, exit_emergency)
