@@ -1,5 +1,19 @@
 # -*- coding: utf-8 -*-
 __title__ = "Change Workset"
+__doc__ = """Version = 1.0
+Date    = 10.07.2025
+_____________________________________________________________________
+Description:
+This is a "Change Workset" tool based on my rule. If you want to use it with another rule, just update the logic.
+_____________________________________________________________________
+How-to:
+-> Just click on the button.
+_____________________________________________________________________
+Last update:
+- [10.07.2025] - 1.0 Release.
+_____________________________________________________________________
+Author: HHaii"""
+
 
 # ╦╔╦╗╔═╗╔═╗╦═╗╔╦╗╔═╗
 # ║║║║╠═╝║ ║╠╦╝ ║ ╚═╗
@@ -118,3 +132,5 @@ for elem in lighting_vs_exit_emergency:
 
 change_workset(user_ws, ws_lighting, lighting)
 change_workset(user_ws, ws_exit_emergency, exit_emergency)
+
+forms.alert("Complete")
