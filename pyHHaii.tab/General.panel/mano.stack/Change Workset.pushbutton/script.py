@@ -74,16 +74,11 @@ change_workset(user_ws, ws_elv, elv)
 cable_tray_ltg = []
 cable_tray_others = []
 for elem in cable_tray:
-    try:
-        type_elem = doc.GetElement(elem.GetTypeId())
-        para_value = type_elem.LookupParameter("Service Type")
-    except TypeError as e:
-        print(e)
-    if para_value:
-        para = para_value.AsString()
-    else:
-        para = ""   
-    if "ltg" in para.lower():
+    type_elem = doc.GetElement(elem.GetTypeId())
+    type_para = type_elem.LookupParameter("Service Type")
+    if para_value in type_para:
+        value = para_value.AsString()
+    if "ltg" in value.lower():
         cable_tray_ltg.append(elem)
     else:
         cable_tray_others.append(elem)
