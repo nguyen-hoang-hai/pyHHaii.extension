@@ -68,9 +68,28 @@ lighting_vs_exit_emergency = select_element_of_category(doc, categories_ws_light
 user_ws = FilteredWorksetCollector(doc).OfKind(WorksetKind.UserWorkset).ToWorksets()
 
 change_workset(user_ws, ws_power_equipment, power_equipment)
-change_workset(user_ws, ws_cable_tray, cable_tray)
 change_workset(user_ws, ws_socket, socket)
 change_workset(user_ws, ws_elv, elv)
+
+cable_tray_ltg = []
+cable_tray_others = []
+for elem in cable_tray:
+    try:
+        type_elem = doc.GetElement(elem.GetTypeId())
+        para_value = type_elem.LookupParameter(ServiceType)
+    except TypeError as e:
+        print(e)
+    if para_value:
+        para = para_value.AsString()
+    else:
+        para = ""   
+    if "ltg" in para.lower():
+        cable_tray_ltg.append(elem)
+    else:
+        cable_tray_others.append(elem)
+        
+change_workset(user_ws, ws_cable_tray, cable_tray_others)
+change_workset(user_ws, ws_lighting, cable_tray_ltg)
 
 lighting = []
 exit_emergency = []
