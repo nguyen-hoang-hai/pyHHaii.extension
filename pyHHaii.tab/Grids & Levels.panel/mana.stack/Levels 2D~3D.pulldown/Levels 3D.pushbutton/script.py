@@ -21,7 +21,7 @@ max_value = len(levels_collector)
 t = Transaction(doc,"Change Level 3D")
 t.Start()
 with ProgressBar() as pb:
-    for counter in range(0,max_value):
+    for counter in range(0, max_value):
         pb.update_progress(counter, max_value)
         for level in levels_collector:
             level.SetDatumExtentType(DatumEnds.End0,view,DatumExtentType.Model)

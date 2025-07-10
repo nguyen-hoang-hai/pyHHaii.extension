@@ -1,19 +1,32 @@
 # -*- coding: utf-8 -*-
+__title__ = "Change Workset"
 
-# .NET Imports
+# ╦╔╦╗╔═╗╔═╗╦═╗╔╦╗╔═╗
+# ║║║║╠═╝║ ║╠╦╝ ║ ╚═╗
+# ╩╩ ╩╩  ╚═╝╩╚═ ╩ ╚═╝ IMPORTS
+#==================================================
+# Regular + Autodesk
+from Autodesk.Revit.DB import *
+from Autodesk.Revit.UI import *
+
+# pyRevit
+from pyrevit import revit, forms
+
+# .NET Imports (You often need List import)
 import clr
 clr.AddReference("System")
 from System.Collections.Generic import List
 
-# Revit Imports
-from Autodesk.Revit.DB import *
-from Autodesk.Revit.UI import *
+# ╦  ╦╔═╗╦═╗╦╔═╗╔╗ ╦  ╔═╗╔═╗
+# ╚╗╔╝╠═╣╠╦╝║╠═╣╠╩╗║  ║╣ ╚═╗
+#  ╚╝ ╩ ╩╩╚═╩╩ ╩╚═╝╩═╝╚═╝╚═╝ VARIABLES
+#==================================================
+doc = __revit__.ActiveUIDocument.Document #type: Document
 
-# Variables
-uidoc = __revit__.ActiveUIDocument
-doc = __revit__.ActiveUIDocument.Document
-
-# Function
+# ╔═╗╦ ╦╔╗╔╔═╗╔╦╗╦╔═╗╔╗╔╔═╗
+# ╠╣ ║ ║║║║║   ║ ║║ ║║║║╚═╗
+# ╚  ╚═╝╝╚╝╚═╝ ╩ ╩╚═╝╝╚╝╚═╝
+#==================================================
 def select_element_of_category(doc, categories):
     if not isinstance(categories, list):
         categories = [categories]
@@ -31,7 +44,7 @@ def change_workset(workset, ws_name, ws_elem):
     if ws_id is None:
         print("{} is not existing".format(ws_name))  
         return
-      
+
     t = Transaction(doc,"Change Workset")
     t.Start()
     for elem in ws_elem:
@@ -40,7 +53,11 @@ def change_workset(workset, ws_name, ws_elem):
             param.Set(ws_id.IntegerValue)
     t.Commit()
 
-# Coding
+# ╔╦╗╔═╗╦╔╗╔
+# ║║║╠═╣║║║║
+# ╩ ╩╩ ╩╩╝╚╝ MAIN
+#==================================================
+# START CODE HERE
 ws_power_equipment  = "KDV_E_POWER_EQUIPMENT"
 ws_cable_tray       = "KDV_E_CABLE TRAY"
 ws_socket           = "KDV_E_SOCKET"
@@ -68,7 +85,20 @@ lighting_vs_exit_emergency = select_element_of_category(doc, categories_ws_light
 user_ws = FilteredWorksetCollector(doc).OfKind(WorksetKind.UserWorkset).ToWorksets()
 
 change_workset(user_ws, ws_power_equipment, power_equipment)
-change_workset(user_ws, ws_cable_tray, cable_tray)
+
+cable_tray_ltg = []
+cable_tray_others = []
+
+for elem in cable_tray:
+    elem_type = doc.GetElement(elem.GetTypeId())
+    type_name = elem_type.get_Parameter(BuiltInParameter.SYMBOL_NAME_PARAM).AsString()
+    if type_name and "ltg" in type_name.lower():
+        cable_tray_ltg.append(elem)
+    else:
+        cable_tray_others.append(elem)
+
+change_workset(user_ws, ws_cable_tray, cable_tray_others)
+change_workset(user_ws, ws_lighting, cable_tray_ltg)
 change_workset(user_ws, ws_socket, socket)
 change_workset(user_ws, ws_elv, elv)
 
