@@ -14,6 +14,8 @@ from pyrevit import *
 from pyrevit import forms
 
 # .NET Imports
+import os, csv, codecs
+import subprocess
 import clr
 clr.AddReference("System")
 from System.Collections.Generic import List
@@ -28,11 +30,11 @@ doc   = __revit__.ActiveUIDocument.Document #type: Document
 # ╠╣ ║ ║║║║║   ║ ║║ ║║║║╚═╗
 # ╚  ╚═╝╝╚╝╚═╝ ╩ ╩╚═╝╝╚╝╚═╝
 #==================================================
-def get_element_by_categories(doc, category):
-    categories = list[BuiltInCategory]()
-    for cat in category:
-        categories.append(cat)
-    return(FilteredElementCollector(doc).WherePasses(ElementMulticategoryFilter(categories)).WhereElementIsNotElementType())
+def get_element_by_categories(doc, categories):
+    bic_list = List[BuiltInCategory]()
+    for cat in categories:
+        bic_list.Add(cat)
+    return FilteredElementCollector(doc).WherePasses(ElementMulticategoryFilter(bic_list)).WhereElementIsNotElementType()
 
 def bbox_intersects_any(mep_bbox, arch_outlines):
     if not mep_bbox:
@@ -76,34 +78,59 @@ ELECTRICAL_CATEGORIES = [
     BuiltInCategory.OST_FireAlarmDevices
 ]
 
-selected_link = forms.SelectFromList.show(link_instances,
+selected_links = forms.SelectFromList.show(link_instances,
                                           name_attr='Name',
                                           multiselect=True,
                                           title='Select Revit Links')
 
-if selected_link:
-    target_folder = forms.pick_folder()
-    if target_folder:
-        arch_bboxes = []
-        for link in selected_link:
-            link_doc = link.GetLinkDocument()
-            link_transform = link.GetTotalTransform()
-            if link_doc:
-                arch_elements = get_element_by_categories(doc, ARCH_CATEGORIES)
-                for elem in arch_elements:
-                    bbox = elem.get_BoundingBox(None)
-                    if bbox:
-                        min_pt = link_transform.OfPoint(bbox.Min)
-                        max_pt = link_transform.OfPoint(bbox.Max)
-                        outline = Outline(min_pt, max_pt)
-                        arch_bboxes.append(outline)
+if not selected_links:
+    forms.alert("No links selected. Script will now exit.", exitscript=True)
 
-        electrical_elements = get_element_by_categories(doc, ELECTRICAL_CATEGORIES)
+target_folder = forms.pick_folder(title="Pick folder to save results")
+if not target_folder:
+    forms.alert("No folder selected. Script will now exit.", exitscript=True)
 
-        invalid_mep = []
-        for el in electrical_elements:
-            bbox = el.get_BoundingBox(None)
-            if not bbox_intersects_any(bbox, arch_bboxes):
-                level_name = doc.GetElement(el.LevelId).Name if el.LevelId != DB.ElementId.InvalidElementId else "N/A"
-                invalid_mep.append((el, level_name))
+arch_bboxes = []
+for link in selected_links:
+    link_doc = link.GetLinkDocument()
+    link_transform = link.GetTotalTransform()
+    if link_doc:
+        arch_elements = get_element_by_categories(link_doc, ARCH_CATEGORIES)
+        for elem in arch_elements:
+            bbox = elem.get_BoundingBox(None)
+            if bbox:
+                min_pt = link_transform.OfPoint(bbox.Min)
+                max_pt = link_transform.OfPoint(bbox.Max)
+                outline = Outline(min_pt, max_pt)
+                arch_bboxes.append(outline)
 
+electrical_elements = get_element_by_categories(doc, ELECTRICAL_CATEGORIES)
+
+invalid_mep = []
+for el in electrical_elements:
+    bbox = el.get_BoundingBox(None)
+    if not bbox_intersects_any(bbox, arch_bboxes):
+        level_name = doc.GetElement(el.LevelId).Name if el.LevelId != ElementId.InvalidElementId else "N/A"
+        invalid_mep.append((el, level_name))
+
+# Export CSV
+if invalid_mep:
+    filename = os.path.join(target_folder, "Floating_MEP_Elements.csv")
+    try:
+        with codecs.open(filename, 'w', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Element Name', 'Element ID', 'Category', 'Level'])
+            for el, level in invalid_mep:
+                cat_name = el.Category.Name if el.Category else "Unknown"
+                writer.writerow([el.Name, el.Id, cat_name, level])
+        
+        forms.alert("Found {} floating MEP elements.\nResults saved to:\n{}".format(len(invalid_mep), filename),
+                    title="Check Complete")
+
+        # Tự động mở file CSV bằng Excel (nếu có cài Excel)
+        subprocess.Popen(filename, shell=True)
+        
+    except Exception as e:
+        forms.alert("Failed to write file:\n{}".format(str(e)), exitscript=True)
+else:
+    forms.alert("All MEP elements are properly placed within architectural bounding boxes.", title="Check Complete")
