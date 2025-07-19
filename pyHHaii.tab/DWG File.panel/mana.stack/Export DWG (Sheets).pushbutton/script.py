@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__title__ = "Export DWG (Plan Views)"
+__title__ = "Export DWG (Sheets)"
 
 # ╦╔╦╗╔═╗╔═╗╦═╗╔╦╗╔═╗
 # ║║║║╠═╝║ ║╠╦╝ ║ ╚═╗
@@ -41,35 +41,26 @@ class ViewWrapper(object):
 # ╩ ╩╩ ╩╩╝╚╝ MAIN
 #==================================================
 # START CODE HERE
-all_views = FilteredElementCollector(doc).OfClass(View).ToElements()
-plan_views = [v for v in all_views if v.ViewType in (
-    ViewType.FloorPlan,
-    ViewType.CeilingPlan
-) and not v.IsTemplate]
-wrapped_views = [ViewWrapper(v) for v in plan_views]
+selected_sheets = forms.select_sheets()
 
-selected_views = forms.SelectFromList.show(wrapped_views,
-                                          name_attr='Name',
-                                          multiselect=True,
-                                          title='Select Views')
+if not selected_sheets:
+    exitscript = True
 
-if not selected_views:
-    forms.alert("No view selected. Script will now exit.", exitscript=True)
-
-if selected_views:
+if selected_sheets:
     dwg_options = DWGExportOptions()
+    dwg_options.MergedViews = True
     output_folder = forms.pick_folder(title="Select Folder To Save DWG File")
 
     if not output_folder:
-        script.exit()
+        exitscript = True
     exported_count = 0
-    for view in selected_views:
+    for sheet in selected_sheets:
         try:
             view_set = List[ElementId]()
-            view_set.Add(view.Id)
-            file_name = "{}.dwg".format(view.Name.replace(" ", "_"))
+            view_set.Add(sheet.Id)
+            file_name = "{}.dwg".format(sheet.Name.replace(" ", "_"))
             doc.Export(output_folder, file_name, view_set, dwg_options)
             exported_count += 1
         except Exception as e:
-            forms.alert("Error", exitscript=True)
+            forms.alert("Please Select Folder To Save DWG File", exitscript=True)
     forms.alert("Done")    

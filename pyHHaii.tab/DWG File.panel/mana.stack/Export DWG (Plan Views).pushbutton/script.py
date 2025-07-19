@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__title__ = "Export DWG (Section Views)"
+__title__ = "Export DWG (Plan Views)"
 
 # ╦╔╦╗╔═╗╔═╗╦═╗╔╦╗╔═╗
 # ║║║║╠═╝║ ║╠╦╝ ║ ╚═╗
@@ -17,6 +17,7 @@ from pyrevit import forms
 import clr
 clr.AddReference("System")
 from System.Collections.Generic import List
+import re
 
 # ╦  ╦╔═╗╦═╗╦╔═╗╔╗ ╦  ╔═╗╔═╗
 # ╚╗╔╝╠═╣╠╦╝║╠═╣╠╩╗║  ║╣ ╚═╗
@@ -31,7 +32,8 @@ doc = __revit__.ActiveUIDocument.Document #type: Document
 class ViewWrapper(object):
     def __init__(self, view):
         self.view = view
-        self.Name = "{} ({})".format(view.Name, view.ViewType.ToString()) 
+        view_type_clean = re.sub(r"(\w)([A-Z])", r"\1 \2", view.ViewType.ToString())
+        self.Name = "{} ({})".format(view.Name, view_type_clean)
 
     def __str__(self):
         return self.Name
@@ -43,8 +45,8 @@ class ViewWrapper(object):
 # START CODE HERE
 all_views = FilteredElementCollector(doc).OfClass(View).ToElements()
 plan_views = [v for v in all_views if v.ViewType in (
-    ViewType.Section,
-    ViewType.Elevation
+    ViewType.FloorPlan,
+    ViewType.CeilingPlan
 ) and not v.IsTemplate]
 wrapped_views = [ViewWrapper(v) for v in plan_views]
 
@@ -54,14 +56,14 @@ selected_views = forms.SelectFromList.show(wrapped_views,
                                           title='Select Views')
 
 if not selected_views:
-    forms.alert("No view selected. Script will now exit.", exitscript=True)
+    exitscript = True
 
 if selected_views:
     dwg_options = DWGExportOptions()
     output_folder = forms.pick_folder(title="Select Folder To Save DWG File")
 
     if not output_folder:
-        script.exit()
+        exitscript = True
     exported_count = 0
     for view in selected_views:
         try:
@@ -71,5 +73,5 @@ if selected_views:
             doc.Export(output_folder, file_name, view_set, dwg_options)
             exported_count += 1
         except Exception as e:
-            forms.alert("Error", exitscript=True)
+            forms.alert("Please Select Folder To Save DWG File", exitscript=True)
     forms.alert("Done")    
