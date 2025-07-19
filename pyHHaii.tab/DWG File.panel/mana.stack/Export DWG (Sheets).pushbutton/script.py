@@ -17,6 +17,7 @@ from pyrevit import forms
 import clr
 clr.AddReference("System")
 from System.Collections.Generic import List
+import re
 
 # ╦  ╦╔═╗╦═╗╦╔═╗╔╗ ╦  ╔═╗╔═╗
 # ╚╗╔╝╠═╣╠╦╝║╠═╣╠╩╗║  ║╣ ╚═╗
@@ -35,6 +36,9 @@ class ViewWrapper(object):
 
     def __str__(self):
         return self.Name
+    
+def sanitize_filename(name):
+    return re.sub(r'[\\/:*?"<>|]', "_", name)
     
 # ╔╦╗╔═╗╦╔╗╔
 # ║║║╠═╣║║║║
@@ -58,7 +62,10 @@ if selected_sheets:
         try:
             view_set = List[ElementId]()
             view_set.Add(sheet.Id)
-            file_name = "{}.dwg".format(sheet.Name.replace(" ", "_"))
+            file_name = "{}_{}.dwg".format(
+                sheet.SheetNumber,
+                sanitize_filename(sheet.Name)
+            )
             doc.Export(output_folder, file_name, view_set, dwg_options)
             exported_count += 1
         except Exception as e:
