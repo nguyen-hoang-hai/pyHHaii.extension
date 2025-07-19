@@ -11,7 +11,7 @@ from Autodesk.Revit.DB import ViewType
 from Autodesk.Revit.UI import *
 
 # pyRevit
-from pyrevit import forms
+from pyrevit import forms, script
 
 # .NET Imports (You often need List import)
 import clr
@@ -48,7 +48,7 @@ def sanitize_filename(name):
 selected_sheets = forms.select_sheets()
 
 if not selected_sheets:
-    exitscript = True
+    script.exit()
 
 if selected_sheets:
     dwg_options = DWGExportOptions()
@@ -56,7 +56,7 @@ if selected_sheets:
     output_folder = forms.pick_folder(title="Select Folder To Save DWG File")
 
     if not output_folder:
-        exitscript = True
+        script.exit()
     exported_count = 0
     for sheet in selected_sheets:
         try:
