@@ -28,4 +28,3 @@ with ProgressBar() as pb:
             level.SetDatumExtentType(DatumEnds.End0,view,DatumExtentType.Model)
             level.SetDatumExtentType(DatumEnds.End1,view,DatumExtentType.Model)
 t.Commit()
-forms.alert("Complete")

@@ -28,4 +28,3 @@ with ProgressBar() as pb:
             grid.SetDatumExtentType(DatumEnds.End0, view, DatumExtentType.ViewSpecific)
             grid.SetDatumExtentType(DatumEnds.End1, view, DatumExtentType.ViewSpecific)
 t.Commit()
-forms.alert("Complete")

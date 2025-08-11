@@ -17,7 +17,7 @@ _____________________________________________________________________
 To-Do:
 - Describe Next Features
 _____________________________________________________________________
-Author: Erik Frits"""
+Author: Quàng Hải"""
 
 # ╦╔╦╗╔═╗╔═╗╦═╗╔╦╗╔═╗
 # ║║║║╠═╝║ ║╠╦╝ ║ ╚═╗
@@ -52,4 +52,4 @@ doc   = __revit__.ActiveUIDocument.Document #type: Document
 # ╩ ╩╩ ╩╩╝╚╝ MAIN
 #==================================================
 # START CODE HERE
-print('Template has been developed by Erik Frits.')
+print('Template has been developed by Quàng Hải.')

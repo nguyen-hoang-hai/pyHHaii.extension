@@ -65,6 +65,7 @@ selected_views = [vw.view for vw in selected_wrapped]
 
 if selected_wrapped:
     dwg_options = DWGExportOptions()
+    dwg_options.MergedViews = True
     output_folder = forms.pick_folder(title="Select Folder To Save DWG File")
 
     if not output_folder:
@@ -79,4 +80,4 @@ if selected_wrapped:
             exported_count += 1
         except Exception as e:
             forms.alert(str(e), exitscript=True)
-    forms.alert("Done")    
+    forms.alert("Done")

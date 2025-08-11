@@ -27,5 +27,4 @@ with ProgressBar() as pb:
         for level in levels_collector:
             level.SetDatumExtentType(DatumEnds.End0,view,DatumExtentType.ViewSpecific)
             level.SetDatumExtentType(DatumEnds.End1,view,DatumExtentType.ViewSpecific)
-t.Commit() 
-forms.alert("Complete")
+t.Commit()
